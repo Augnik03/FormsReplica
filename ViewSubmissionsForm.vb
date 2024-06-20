@@ -2,11 +2,11 @@
 
 Public Class ViewSubmissionsForm
     Private currentIndex As Integer = 0
-    Private submissions As List(Of Submission)
+    Private submissions As List(Of BackendSubmission)
     Private stopwatch As Stopwatch
     Private timer As System.Timers.Timer
 
-    Public Sub New(submissionsList As List(Of Submission))
+    Public Sub New(submissionsList As List(Of BackendSubmission))
         InitializeComponent()
         submissions = submissionsList
         stopwatch = New Stopwatch()
@@ -54,7 +54,8 @@ Public Class ViewSubmissionsForm
     End Sub
 End Class
 
-Public Class Submission
+' Renamed Submission class to avoid conflict with global namespace
+Public Class BackendSubmission
     Public Property Name As String
     Public Property Email As String
     Public Property PhoneNumber As String

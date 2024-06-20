@@ -1,20 +1,20 @@
 ﻿Public Class MainForm
     ' Define submissionsList here or retrieve it from another source
-    Private submissionsList As List(Of Submission)
+    Private submissionsList As List(Of BackendSubmission)
 
     Public Sub New()
         InitializeComponent()
         ' Initialize submissionsList with some data
-        submissionsList = New List(Of Submission)()
+        submissionsList = New List(Of BackendSubmission)()
         ' Add some sample submissions (replace this with your actual data)
-        submissionsList.Add(New Submission With {
+        submissionsList.Add(New BackendSubmission With {
             .Name = "John Doe",
             .Email = "john@example.com",
             .PhoneNumber = "123-456-7890",
             .GitHubLink = "https://github.com/johndoe",
             .StopwatchTime = TimeSpan.FromMinutes(10) ' Sample stopwatch time
         })
-        submissionsList.Add(New Submission With {
+        submissionsList.Add(New BackendSubmission With {
             .Name = "Jane Smith",
             .Email = "jane@example.com",
             .PhoneNumber = "987-654-3210",

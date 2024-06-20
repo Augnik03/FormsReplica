@@ -1,4 +1,7 @@
 ﻿Imports System.Diagnostics
+Imports System.Net.Http
+Imports System.Text
+Imports Newtonsoft.Json
 
 Public Class CreateSubmissionForm
     Private stopwatch As Stopwatch
@@ -27,28 +30,35 @@ Public Class CreateSubmissionForm
     End Sub
 
     Private Sub btnSubmit_Click(sender As Object, e As EventArgs) Handles btnSubmit.Click
-        Dim submission As New SubmissionData With {
-            .SubmissionName = txtName.Text,
-            .SubmissionEmail = txtEmail.Text,
-            .SubmissionPhoneNumber = txtPhoneNumber.Text,
-            .SubmissionGitHubLink = txtGitHubLink.Text,
-            .SubmissionStopwatchTime = stopwatch.Elapsed
-        }
+        Try
+            Dim submission As New Submission With {
+                .SubmissionName = txtName.Text,
+                .SubmissionEmail = txtEmail.Text,
+                .SubmissionPhoneNumber = txtPhoneNumber.Text,
+                .SubmissionGitHubLink = txtGitHubLink.Text,
+                .SubmissionStopwatchTime = stopwatch.Elapsed.ToString("hh\:mm\:ss")
+            }
 
-        ' Code to submit the form data to the backend goes here
+            Dim httpClient As New HttpClient()
+            Dim content As New StringContent(JsonConvert.SerializeObject(submission), Encoding.UTF8, "application/json")
+            Dim response As HttpResponseMessage = httpClient.PostAsync("http://localhost:3000/submit", content).Result
+
+            If response.IsSuccessStatusCode Then
+                MessageBox.Show("Submission received")
+            Else
+                MessageBox.Show("Failed to submit")
+            End If
+        Catch ex As Exception
+            MessageBox.Show($"An error occurred: {ex.Message}")
+        End Try
     End Sub
 
 End Class
 
-Public Class SubmissionData
+Public Class Submission
     Public Property SubmissionName As String
     Public Property SubmissionEmail As String
     Public Property SubmissionPhoneNumber As String
     Public Property SubmissionGitHubLink As String
-    Public Property SubmissionStopwatchTime As TimeSpan
+    Public Property SubmissionStopwatchTime As String
 End Class
-
-
-
-
-
