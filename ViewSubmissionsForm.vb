@@ -1,4 +1,7 @@
-﻿Imports System.Timers
+﻿Imports System.Net.Http
+Imports System.Timers
+Imports Newtonsoft.Json
+Imports System.Diagnostics
 
 Public Class ViewSubmissionsForm
     Private currentIndex As Integer = 0
@@ -6,14 +9,35 @@ Public Class ViewSubmissionsForm
     Private stopwatch As Stopwatch
     Private timer As System.Timers.Timer
 
-    Public Sub New(submissionsList As List(Of BackendSubmission))
+    Public Sub New()
         InitializeComponent()
-        submissions = submissionsList
         stopwatch = New Stopwatch()
         timer = New System.Timers.Timer(1000) ' 1 second interval
         AddHandler timer.Elapsed, AddressOf OnTimedEvent
         timer.Start()
-        DisplaySubmission()
+        FetchSubmissionsAsync()
+    End Sub
+
+    Private Async Sub FetchSubmissionsAsync()
+        Try
+            Dim httpClient As New HttpClient()
+            Dim response As HttpResponseMessage = Await httpClient.GetAsync("http://localhost:3000/submissions")
+
+            If response.IsSuccessStatusCode Then
+                Dim jsonResponse As String = Await response.Content.ReadAsStringAsync()
+                MessageBox.Show($"JSON Response: {jsonResponse}") ' Debug: Show JSON response
+                submissions = JsonConvert.DeserializeObject(Of List(Of BackendSubmission))(jsonResponse)
+                If submissions IsNot Nothing AndAlso submissions.Count > 0 Then
+                    Me.BeginInvoke(New Action(Sub() DisplaySubmission()))
+                Else
+                    MessageBox.Show("No submissions available.")
+                End If
+            Else
+                MessageBox.Show("Failed to fetch submissions")
+            End If
+        Catch ex As Exception
+            MessageBox.Show($"An error occurred: {ex.Message}")
+        End Try
     End Sub
 
     Private Sub DisplaySubmission()
@@ -23,15 +47,13 @@ Public Class ViewSubmissionsForm
             txtEmail.Text = submission.Email
             txtPhoneNumber.Text = submission.PhoneNumber
             txtGitHubLink.Text = submission.GitHubLink
-            UpdateStopwatchTime()
+            txtStopwatchTime.Text = submission.StopwatchTime
         End If
     End Sub
 
     Private Sub OnTimedEvent(source As Object, e As ElapsedEventArgs)
         If stopwatch.IsRunning Then
-            stopwatch.Stop()
-            txtStopwatchTime.Invoke(Sub() UpdateStopwatchTime())
-            stopwatch.Start()
+            txtStopwatchTime.BeginInvoke(New Action(Sub() UpdateStopwatchTime()))
         End If
     End Sub
 
@@ -54,11 +76,10 @@ Public Class ViewSubmissionsForm
     End Sub
 End Class
 
-' Renamed Submission class to avoid conflict with global namespace
 Public Class BackendSubmission
     Public Property Name As String
     Public Property Email As String
     Public Property PhoneNumber As String
     Public Property GitHubLink As String
-    Public Property StopwatchTime As TimeSpan
+    Public Property StopwatchTime As String
 End Class

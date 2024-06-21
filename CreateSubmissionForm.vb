@@ -39,8 +39,11 @@ Public Class CreateSubmissionForm
                 .SubmissionStopwatchTime = stopwatch.Elapsed.ToString("hh\:mm\:ss")
             }
 
+            Dim jsonString As String = JsonConvert.SerializeObject(submission)
+            MessageBox.Show("Serialized JSON: " & jsonString)
+
             Dim httpClient As New HttpClient()
-            Dim content As New StringContent(JsonConvert.SerializeObject(submission), Encoding.UTF8, "application/json")
+            Dim content As New StringContent(jsonString, Encoding.UTF8, "application/json")
             Dim response As HttpResponseMessage = httpClient.PostAsync("http://localhost:3000/submit", content).Result
 
             If response.IsSuccessStatusCode Then
